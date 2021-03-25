@@ -1,0 +1,103 @@
+---
+title: "Analyzing Vaccine Supply in Texas"
+description: |
+  A living analysis of vaccine supply in Texas.
+author:
+  - name: Matt Worthington 
+    url: https://example.com/norajones
+    affiliation: The LBJ School of Public Affairs
+    affiliation_url: https://example.com/spacelysprokets
+date: "`r Sys.Date()`"
+output:
+  distill::distill_article:
+    code_folding: true
+    toc: true
+    toc_float: true
+---
+
+## Analysis Setup
+
+Before we start building out our reproducible analysis, let's go ahead and make sure any R packages are loaded and installed properly. The code to install necessary packages and load them can be viewed by clicking on the "Show Code" arrow. 
+
+```{r setup, include = TRUE, echo=TRUE}
+# In case these aren't installed, uncomment this and run it.
+# install.packages("janitor", "tidyverse", "gt")
+# devtools::install_github("utexas-lbjp-data/lbjdata")
+
+library(janitor)       # Package with useful + convenient data cleaning functions
+library(tidyverse)     # Core Set of R Data Science Tools (dplyr, ggplot2, tidyr, readr, etc.)
+library(lbjdata)       # Package I made with LBJ-friendly ggplot2 themes
+
+```
+
+
+## Import Our Vaccine Provider and Supply Data
+
+This data comes from the Texas Department of State Health Services and contains the list of vaccine providers across the state of Texas, which can be found on [this page](https://dshs.texas.gov/coronavirus/additionaldata/). They use it for their own interactive mapping application of vaccine provider sites.[^1] Each provider is assigned a type and has a report of how much vaccine supply they have for each of the three approved vaccines. We'll use the `read_csv()` function to read in the data straight from the DSHS website. This will help make sure our analysis is "living", meaning any chart we make will update whenever the feed from DSHS gets updated, and "reproducible", meaning anyone who takes this R Markdown document can run it in their RStudio IDE and get the exact same thing you did. 
+
+<aside> The `read_csv()` comes from the [`readr`](https://readr.tidyverse.org) package that was loaded when we ran `library(tidyverse)` in the setup chunk above (lines 18:30 in the RMarkdown document).</aside>
+
+```{r import-data}
+
+provider_data_raw <- readr::read_csv("https://genesis.soc.texas.gov/files/accessibility/vaccineprovideraccessibilitydata.csv") %>% 
+  janitor::clean_names() # This function makes column headers machine readable
+
+glimpse(provider_data_raw)
+
+```
+
+## Transform our Vaccine Data
+
+Now that we've imported it and created a data object called `provider_data_raw`, we can call on that object and use a handful of functions from the [`dplyr`](https://dplyr.tidyverse.org) package to transform our data into the shape we want for visualizing. 
+
+**The question we'll trying to answer is simple**: "Among all providers, how much of each vaccine exists in Texas?"
+
+```{r transform-data}
+
+supply_data <- provider_data_raw %>% 
+  mutate(state = "Texas") %>%               # This adds a column where every entry is the word "Texas"
+  group_by(state) %>%                       # This groups any future functions I write by the state column I created
+  summarise(                                # This begins the summarise() function
+    pfizer_tot = sum(pfizer_available),     # Creates a column with all pfizer supply
+    moderna_tot = sum(moderna_available),   # Creates a column with all pfizer supply
+    jj_tot = sum(jj_available)              # Creates a column with all pfizer supply
+  )  %>%                                    # This ends the summarise() function
+  pivot_longer(cols = c(pfizer_tot, moderna_tot, jj_tot),
+               names_to = "vaccine_type",
+               values_to = "supply")
+
+glimpse(supply_data)
+
+```
+
+## Visualize our Vaccine Data
+
+Now that our data's in shape, we'll make a simple bar chart to show the distribution of vaccine supply in Texas.
+
+```{r visualize-data}
+
+supply_chart <- ggplot(supply_data) +
+  aes(x = vaccine_type, y = supply, fill = vaccine_type) +
+  geom_col() +
+  theme_lbj() +
+  labs(title = "Texas Vaccine Supply, by Type",
+       subtitle = "Shown are the current supply of vaccines available in Texas",
+       caption = "Source: Texas Department of State Health Services",
+       x = "Vaccine Type",
+       y = "Current Supply in Texas")
+  
+supply_chart
+
+```
+
+## Export our Transformed Dataset and Visualization
+
+Now that we've done all of this, we want to share our data and our chart, so we'll use a couple of functions to save this each time we run it.
+
+```{r export-data}
+
+write_csv(supply_data, "clean_supply_data.csv", )
+
+ggsave("vaccine_supply_chart.png", supply_chart, device = "png", dpi=300, width = 10, height = 6)
+
+```
