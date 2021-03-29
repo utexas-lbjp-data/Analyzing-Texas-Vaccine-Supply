@@ -7,19 +7,19 @@ author:
   affiliation_url: https://example.com/spacelysprokets
 date: "`r Sys.Date()`"
 output:
-  word_document:
-    toc: yes
-  distill::distill_article:
-    code_folding: yes
-    toc: yes
-    toc_float: yes
-  pdf_document: default
   html_document: 
     theme: paper
     toc: true
     toc_float:
       collapsed: false
       smooth_scroll: false
+  word_document:
+    toc: yes
+  pdf_document: default
+  distill::distill_article:
+    code_folding: yes
+    toc: yes
+    toc_float: yes
 description: |
   A living analysis of vaccine supply in Texas.
 ---
@@ -55,7 +55,7 @@ The `read_csv()` comes from the [`readr`](https://readr.tidyverse.org) package t
 
 ```{r import-data}
 
-provider_data_raw <- readr::read_csv("https://genesis.soc.texas.gov/files/accessibility/vaccineprovideraccessibilitydata.csv") %>% 
+provider_data_raw <- readr::read_csv("") %>% 
   janitor::clean_names() # This function makes column headers machine readable
 
 dplyr::glimpse(provider_data_raw) # glimpse() lets you preview a data object
@@ -78,7 +78,7 @@ supply_data <- provider_data_raw %>%
     Moderna = sum(moderna_available), # Creates a column with all pfizer supply
     JandJ = sum(jj_available) # Creates a column with all pfizer supply
   )  %>%   # This ends the summarise() function
-  tidyr::pivot_longer(cols = c(Pfizer, Moderna, JandJ), # reshapes our data from wide to long
+  tidyr::pivot_longer(cols = c(), # reshapes our data from wide to long
                       names_to = "vaccine_type",
                       values_to = "supply")
 
@@ -96,8 +96,8 @@ supply_chart <- supply_data %>% # Call on the data
   ggplot2::ggplot() +  # Draw A Chart Canvas
   ggplot2::aes(x = vaccine_type, y = supply, fill = vaccine_type) + # Define How Data Gets Mapped
   ggplot2::geom_col() + # Translate into a bar chart format
-  ggplot2::theme_minimal() + # Add a basic ggplot2 theme
-  ggplot2::theme(legend.position = "none", # Hide the legend
+  # ggplot2:: + # Add a basic ggplot2 theme
+  ggplot2::theme(legend.position = "", # Hide the legend
                  plot.title = element_text(face = "bold")) + # Make the title bold
   ggplot2::labs(title = "Texas Vaccine Supply, by Type", # Add a title
                 subtitle = "Shown are the current supply of vaccines available in Texas", # Add a subtitle
@@ -141,17 +141,17 @@ modelsummary::modelsummary(model_1, stars = TRUE) # Show regression results in a
 
 ### Regression Chart
 
-```{r regression-chart}
+```{r regression-chart, eval=FALSE}
 
 modelsummary::modelplot(model_1) + # Draw a chart using modelsummary package 
-  ggplot2::theme_dark() + # Add ggplot2 dark theme
-  ggplot2::theme(legend.position = "none", # Hide legend
-        plot.title = element_text(face = "bold")) + # Make title bold
-  ggplot2::labs(title = "Regression Chart: 'total_shipped ~ type'", # Add a title
-       subtitle = "How do vaccine shipments and provider type relate?", # Add a subtitle
+  # ggplot2:: + # Add ggplot2 dark theme
+  ggplot2::theme(legend.position = "", # Hide legend
+        plot.title = element_text(face = "")) + # Make title bold
+  ggplot2::labs(title = "", # Add a title
+       subtitle = "", # Add a subtitle
        caption = "Source: Texas Department of State Health Services", # Add a caption note
-       x = "Statistic", # Add a title for the X Axis
-       y = "Provider Types") # Add a title for the Y Axis
+       x = "", # Add a title for the X Axis
+       y = "") # Add a title for the Y Axis
 
 ```
 
