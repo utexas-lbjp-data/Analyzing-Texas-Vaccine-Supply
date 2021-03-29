@@ -71,8 +71,8 @@ Now that we've imported it and created a data object called `provider_data_raw`,
 ```{r transform-data}
 
 supply_data <- provider_data_raw %>% 
-  dplyr::mutate(state = "Texas") %>%  # This adds a column where every entry is the word "Texas"
-  dplyr::group_by(state) %>% # This groups any future functions I write by the state column I created
+#  dplyr::mutate(state = "Texas") %>%  # This adds a column where every entry is the word "Texas"
+#  dplyr::group_by(state) %>% # This groups any future functions I write by the state column I created
   dplyr::summarise(          # This begins the summarise() function
     Pfizer = sum(pfizer_available), # Creates a column with all pfizer supply
     Moderna = sum(moderna_available), # Creates a column with all moderna supply
