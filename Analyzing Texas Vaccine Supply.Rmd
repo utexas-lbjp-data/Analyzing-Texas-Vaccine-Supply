@@ -7,8 +7,6 @@ author:
   affiliation_url: https://example.com/spacelysprokets
 date: "`r Sys.Date()`"
 output:
-  word_document:
-    toc: yes
   distill::distill_article:
     code_folding: yes
     toc: yes
@@ -20,6 +18,8 @@ output:
     toc_float:
       collapsed: false
       smooth_scroll: false
+  word_document:
+    toc: yes
 description: |
   A living analysis of vaccine supply in Texas.
 ---
@@ -75,8 +75,8 @@ supply_data <- provider_data_raw %>%
   dplyr::group_by(state) %>% # This groups any future functions I write by the state column I created
   dplyr::summarise(          # This begins the summarise() function
     Pfizer = sum(pfizer_available), # Creates a column with all pfizer supply
-    Moderna = sum(moderna_available), # Creates a column with all pfizer supply
-    JandJ = sum(jj_available) # Creates a column with all pfizer supply
+    Moderna = sum(moderna_available), # Creates a column with all moderna supply
+    JandJ = sum(jj_available) # Creates a column with all jj supply
   )  %>%   # This ends the summarise() function
   tidyr::pivot_longer(cols = c(Pfizer, Moderna, JandJ), # reshapes our data from wide to long
                       names_to = "vaccine_type",
